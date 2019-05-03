@@ -1,4 +1,4 @@
-package android.quoccuong.barberbooking;
+package dev.quoccuong.barberbooking;
 
 import org.junit.Test;
 

@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     android:background="@drawable/my_bg"
     android:padding="8dp"
-    tools:context=".MainActivity">
+    tools:context="dev.quoccuong.barberbooking.MainActivity">
 
     <TextView
-        android:id="@+id/text_skip"
+        android:id="@+id/txt_skip"
         android:text="Just Skip"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
@@ -24,8 +24,8 @@
         android:background="@color/colorButton"
         android:textColor="@android:color/white"
         android:fontFamily="@font/bellerose"
-        android:textSize="22sp"
-        android:layout_above="@id/text_skip"
+        android:textSize="24sp"
+        android:layout_above="@id/txt_skip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </RelativeLayout>

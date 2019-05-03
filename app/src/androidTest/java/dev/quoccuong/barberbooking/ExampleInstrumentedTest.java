@@ -1,4 +1,4 @@
-package android.quoccuong.barberbooking;
+package dev.quoccuong.barberbooking;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
