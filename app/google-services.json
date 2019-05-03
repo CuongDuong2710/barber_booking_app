@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:664886634207:android:c35db753dc5eb9e7",
         "android_client_info": {
-          "package_name": "android.quoccuong.barberbooking"
+          "package_name": "dev.quoccuong.barberbooking"
         }
       },
       "oauth_client": [
