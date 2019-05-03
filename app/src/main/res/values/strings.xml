@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">barberbooking</string>
+    <string name="app_name">Barber Shop</string>
+    <string name="FACEBOOK_APP_ID">443243426483825</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">66e2083bb0f393e92d6118024be9f4bf</string>
+
 </resources>
