@@ -4,10 +4,13 @@ import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.facebook.accountkit.Account;
@@ -15,6 +18,8 @@ import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitCallback;
 import com.facebook.accountkit.AccountKitError;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -26,6 +31,7 @@ import butterknife.ButterKnife;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Fragment.HomeFragment;
 import dev.quoccuong.barberbooking.Fragment.ShoppingFragment;
+import dev.quoccuong.barberbooking.Model.User;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -82,6 +88,7 @@ public class HomeActivity extends AppCompatActivity {
         // View
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             Fragment fragment = null;
+
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 if (menuItem.getItemId() == R.id.action_home)
@@ -101,6 +108,41 @@ public class HomeActivity extends AppCompatActivity {
         return false;
     }
 
-    private void showUpdateDialog(String toString) {
+    private void showUpdateDialog(final String phoneNumber) {
+        // init dialog
+        bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setTitle("One more step!");
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        bottomSheetDialog.setCancelable(false);
+        View sheetView = getLayoutInflater().inflate(R.layout.layout_update_information, null);
+
+        Button btnUpdate = sheetView.findViewById(R.id.btn_update);
+        final TextInputEditText edtName = sheetView.findViewById(R.id.edt_name);
+        final TextInputEditText edtAddress = sheetView.findViewById(R.id.edt_address);
+
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                User user = new User(edtName.getText().toString(), edtAddress.getText().toString(), phoneNumber);
+                userRef.document(phoneNumber)
+                        .set(user)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                bottomSheetDialog.dismiss();
+                                Toast.makeText(HomeActivity.this, "Thank you", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                bottomSheetDialog.dismiss();
+                                Toast.makeText(HomeActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
     }
 }
