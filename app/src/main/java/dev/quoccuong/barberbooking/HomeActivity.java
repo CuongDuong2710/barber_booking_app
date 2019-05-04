@@ -1,5 +1,6 @@
 package dev.quoccuong.barberbooking;
 
+import android.app.AlertDialog;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -32,6 +33,7 @@ import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Fragment.HomeFragment;
 import dev.quoccuong.barberbooking.Fragment.ShoppingFragment;
 import dev.quoccuong.barberbooking.Model.User;
+import dmax.dialog.SpotsDialog;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -42,6 +44,8 @@ public class HomeActivity extends AppCompatActivity {
 
     CollectionReference userRef;
 
+    AlertDialog loadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +54,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // init
         userRef = FirebaseFirestore.getInstance().collection("User");
+        loadingDialog = new SpotsDialog.Builder().setContext(this).setCancelable(false).build();
 
         // Check intent, if isLogin = true, enable full access
         // If isLogin = false, just let user around shopping to view
@@ -57,6 +62,7 @@ public class HomeActivity extends AppCompatActivity {
             boolean isLogin = getIntent().getBooleanExtra(Common.IS_LOGIN, false);
 
             if (isLogin) {
+                loadingDialog.show();
                 // check if user is exists
                 AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
                     @Override
@@ -71,6 +77,7 @@ public class HomeActivity extends AppCompatActivity {
                                         if (!userSnapshot.exists()) {
                                             showUpdateDialog(account.getPhoneNumber().toString());
                                         }
+                                        dismissLoadingDialog();
                                     }
                                 }
                             });
@@ -98,6 +105,14 @@ public class HomeActivity extends AppCompatActivity {
                 return loadFragment(fragment);
             }
         });
+
+        // set default home
+        bottomNavigationView.setSelectedItemId(R.id.action_home);
+    }
+
+    private void dismissLoadingDialog() {
+        if (loadingDialog.isShowing())
+            loadingDialog.dismiss();
     }
 
     private boolean loadFragment(Fragment fragment) {
@@ -109,7 +124,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void showUpdateDialog(final String phoneNumber) {
-        // init dialog
+        // init loadingDialog
         bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setTitle("One more step!");
         bottomSheetDialog.setCanceledOnTouchOutside(false);
