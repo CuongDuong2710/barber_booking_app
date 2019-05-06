@@ -14,6 +14,7 @@
         android:background="@color/colorButton"
         android:orientation="horizontal"
         android:padding="8dp"
+        android:visibility="gone"
         android:weightSum="4">
 
         <ImageView
@@ -63,24 +64,24 @@
             app:cardCornerRadius="8dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
                 <ImageView
-                    android:src="@drawable/ic_event_note_black_24dp"
                     android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_height="50dp" />
+                    android:src="@drawable/ic_event_note_black_24dp" />
 
                 <TextView
-                    android:text="Booking"
-                    android:fontFamily="@font/bellerose"
-                    android:textSize="@dimen/textCardSize"
-                    android:layout_gravity="center_horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/bellerose"
+                    android:text="Booking"
+                    android:textSize="@dimen/textCardSize" />
+
             </LinearLayout>
 
         </android.support.v7.widget.CardView>
@@ -94,23 +95,23 @@
             app:cardCornerRadius="8dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <ImageView
-                    android:src="@drawable/ic_shopping_cart_black_24dp"
                     android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_height="50dp" />
+                    android:src="@drawable/ic_shopping_cart_black_24dp" />
 
                 <TextView
-                    android:text="Cart"
-                    android:fontFamily="@font/bellerose"
-                    android:textSize="@dimen/textCardSize"
-                    android:layout_gravity="center_horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/bellerose"
+                    android:text="Cart"
+                    android:textSize="@dimen/textCardSize" />
 
             </LinearLayout>
 
@@ -125,23 +126,23 @@
             app:cardCornerRadius="8dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <ImageView
-                    android:src="@drawable/ic_history_black_24dp"
                     android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_height="50dp" />
+                    android:src="@drawable/ic_history_black_24dp" />
 
                 <TextView
-                    android:text="History"
-                    android:fontFamily="@font/bellerose"
-                    android:textSize="@dimen/textCardSize"
-                    android:layout_gravity="center_horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/bellerose"
+                    android:text="History"
+                    android:textSize="@dimen/textCardSize" />
 
             </LinearLayout>
 
@@ -156,27 +157,66 @@
             app:cardCornerRadius="8dp">
 
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <ImageView
-                    android:src="@drawable/ic_notifications_black_24dp"
                     android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_height="50dp" />
+                    android:src="@drawable/ic_notifications_black_24dp" />
 
                 <TextView
-                    android:text="Notification"
-                    android:fontFamily="@font/bellerose"
-                    android:textSize="@dimen/textCardSize"
-                    android:layout_gravity="center_horizontal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/bellerose"
+                    android:text="Notification"
+                    android:textSize="@dimen/textCardSize" />
 
             </LinearLayout>
 
         </android.support.v7.widget.CardView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <ss.com.bannerslider.Slider
+            android:id="@+id/banner_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:fontFamily="@font/bellerose"
+                android:gravity="center_vertical"
+                android:text="Look Book"
+                android:textColor="@color/colorButton"
+                android:textSize="18sp" />
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_look_book"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal" />
 
     </LinearLayout>
 

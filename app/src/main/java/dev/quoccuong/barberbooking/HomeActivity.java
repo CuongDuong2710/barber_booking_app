@@ -76,6 +76,12 @@ public class HomeActivity extends AppCompatActivity {
                                         DocumentSnapshot userSnapshot = task.getResult();
                                         if (!userSnapshot.exists()) {
                                             showUpdateDialog(account.getPhoneNumber().toString());
+                                        } else {
+                                            // if user already available in our system
+                                            Common.currentUser = userSnapshot.toObject(User.class);
+
+                                            // set default home
+                                            bottomNavigationView.setSelectedItemId(R.id.action_home);
                                         }
                                         dismissLoadingDialog();
                                     }
@@ -105,9 +111,6 @@ public class HomeActivity extends AppCompatActivity {
                 return loadFragment(fragment);
             }
         });
-
-        // set default home
-        bottomNavigationView.setSelectedItemId(R.id.action_home);
     }
 
     private void dismissLoadingDialog() {
@@ -138,13 +141,15 @@ public class HomeActivity extends AppCompatActivity {
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                User user = new User(edtName.getText().toString(), edtAddress.getText().toString(), phoneNumber);
+                final User user = new User(edtName.getText().toString(), edtAddress.getText().toString(), phoneNumber);
                 userRef.document(phoneNumber)
                         .set(user)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 bottomSheetDialog.dismiss();
+                                Common.currentUser = user; // set current user when update
+                                bottomNavigationView.setSelectedItemId(R.id.action_home);// set default home
                                 Toast.makeText(HomeActivity.this, "Thank you", Toast.LENGTH_SHORT).show();
                             }
                         })
