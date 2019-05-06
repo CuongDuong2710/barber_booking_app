@@ -1,6 +1,6 @@
 package dev.quoccuong.barberbooking.Model;
 
-public class Banner {
+public class Banner { // LookBook same as
     private String image;
 
     public Banner() {
