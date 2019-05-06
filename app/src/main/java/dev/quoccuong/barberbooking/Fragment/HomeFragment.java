@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,10 +30,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dev.quoccuong.barberbooking.Adapter.HomeSliderAdapter;
+import dev.quoccuong.barberbooking.Adapter.LookBookAdapter;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Interface.IBannerLoadListener;
 import dev.quoccuong.barberbooking.Interface.ILookBookLoadListener;
 import dev.quoccuong.barberbooking.Model.Banner;
+import dev.quoccuong.barberbooking.Model.LookBook;
 import dev.quoccuong.barberbooking.Service.PicassoImageLoadingService;
 import ss.com.bannerslider.Slider;
 
@@ -82,9 +85,32 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
         if (AccountKit.getCurrentAccessToken() != null) {
             setUserInformation();
             loadBanner();
+            loadLookBook();
         }
 
         return view;
+    }
+
+    private void loadLookBook() {
+        lookBookRef.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        List<LookBook> lookBooks = new ArrayList<>();
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot lookBookSnapshot : task.getResult()) {
+                                LookBook lookBook = lookBookSnapshot.toObject(LookBook.class);
+                                lookBooks.add(lookBook);
+                            }
+                            iLookBookLoadListener.onLookBookLoadSuccess(lookBooks);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                iLookBookLoadListener.onLookBookLoadFailed(e.getMessage());
+            }
+        });
     }
 
     private void loadBanner() {
@@ -125,12 +151,14 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     }
 
     @Override
-    public void onLookBookLoadSuccess(List<Banner> banners) {
-
+    public void onLookBookLoadSuccess(List<LookBook> lookBooks) {
+        recyclerViewLookBook.setHasFixedSize(true);
+        recyclerViewLookBook.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewLookBook.setAdapter(new LookBookAdapter(getActivity(), lookBooks));
     }
 
     @Override
     public void onLookBookLoadFailed(String message) {
-
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 }
