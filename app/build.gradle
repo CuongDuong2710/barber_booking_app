@@ -37,4 +37,6 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.facebook.android:account-kit-sdk:4.39.0'
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
+    implementation 'com.ss.bannerslider:bannerslider:2.0.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
