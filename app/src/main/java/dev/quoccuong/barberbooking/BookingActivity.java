@@ -13,6 +13,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dev.quoccuong.barberbooking.Adapter.MyViewPagerAdapter;
 
 public class BookingActivity extends AppCompatActivity {
 
@@ -36,7 +37,29 @@ public class BookingActivity extends AppCompatActivity {
         setColorPreviousButton();
 
         // view pager
-//        viewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager()));
+        viewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager()));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int page) {
+                if (page == 0)
+                    btnPreviousStep.setEnabled(false);
+                else
+                    btnPreviousStep.setEnabled(true);
+
+                setColorPreviousButton();
+                setColorNextButton();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
     }
 
     private void setColorPreviousButton() {
