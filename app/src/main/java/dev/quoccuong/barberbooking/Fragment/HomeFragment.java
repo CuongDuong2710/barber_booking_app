@@ -1,10 +1,12 @@
 package dev.quoccuong.barberbooking.Fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,9 +30,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import dev.quoccuong.barberbooking.Adapter.HomeSliderAdapter;
 import dev.quoccuong.barberbooking.Adapter.LookBookAdapter;
+import dev.quoccuong.barberbooking.BookingActivity;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Interface.IBannerLoadListener;
 import dev.quoccuong.barberbooking.Interface.ILookBookLoadListener;
@@ -68,6 +72,10 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
         lookBookRef = FirebaseFirestore.getInstance().collection("Lookbook");
     }
 
+    @OnClick(R.id.card_view_booking)
+    void booking() {
+        startActivity(new Intent(getActivity(), BookingActivity.class));
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

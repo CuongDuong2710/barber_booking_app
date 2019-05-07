@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="dev.quoccuong.barberbooking.HomeActivity"></activity>
+        <activity android:name="dev.quoccuong.barberbooking.BookingActivity"></activity>
+        <activity android:name="dev.quoccuong.barberbooking.HomeActivity" />
 
         <meta-data
             android:name="com.facebook.accountkit.ApplicationName"
