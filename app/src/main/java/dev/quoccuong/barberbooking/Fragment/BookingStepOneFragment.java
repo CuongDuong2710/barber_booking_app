@@ -1,10 +1,12 @@
 package dev.quoccuong.barberbooking.Fragment;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,9 +28,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import dev.quoccuong.barberbooking.Adapter.MySalonAdapter;
+import dev.quoccuong.barberbooking.Common.SpacesItemDecoration;
 import dev.quoccuong.barberbooking.Interface.IAllSalonsLoadListener;
+import dev.quoccuong.barberbooking.Interface.IBranchLoadListener;
+import dev.quoccuong.barberbooking.Model.Salon;
+import dmax.dialog.SpotsDialog;
 
-public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadListener {
+public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadListener, IBranchLoadListener {
 
     static BookingStepOneFragment instance;
 
@@ -36,6 +43,7 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
     CollectionReference branchRef;
 
     IAllSalonsLoadListener iAllSalonsLoadListener;
+    IBranchLoadListener iBranchLoadListener;
 
     @BindView(R.id.spinner)
     MaterialSpinner spinner;
@@ -43,6 +51,7 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
     RecyclerView recyclerSalon;
 
     Unbinder unbinder;
+    AlertDialog dialog;
 
     public static BookingStepOneFragment getInstance() {
         if (instance == null)
@@ -56,6 +65,9 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
 
         allSalonsRef = FirebaseFirestore.getInstance().collection("AllSalon");
         iAllSalonsLoadListener = this;
+        iBranchLoadListener = this;
+
+        dialog = new SpotsDialog.Builder().setContext(getActivity()).build();
     }
 
     @Nullable
@@ -66,9 +78,16 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
         View itemView = inflater.inflate(R.layout.fragment_booking_step_one, container, false);
         unbinder = ButterKnife.bind(this, itemView);
 
+        initView();
         loadAllSalon();
 
         return itemView;
+    }
+
+    private void initView() {
+        recyclerSalon.setHasFixedSize(true);
+        recyclerSalon.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        recyclerSalon.addItemDecoration(new SpacesItemDecoration(10));
     }
 
     private void loadAllSalon() {
@@ -96,10 +115,60 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
     @Override
     public void onAllSalonsLoadSuccess(List<String> areaNames) {
         spinner.setItems(areaNames);
+        spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(MaterialSpinner view, int position, long id, Object item) {
+                if (position > 0)
+                    loadBranchOfCity(item.toString());
+                else
+                    recyclerSalon.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void loadBranchOfCity(String cityName) {
+        dialog.show();
+
+        branchRef = FirebaseFirestore.getInstance()
+                .collection("AllSalon")
+                .document(cityName)
+                .collection("Branch");
+
+        branchRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                List<Salon> salons = new ArrayList<>();
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                        salons.add(documentSnapshot.toObject(Salon.class));
+                    }
+                    iBranchLoadListener.onBranchLoadSuccess(salons);
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                iBranchLoadListener.onBranchLoadFailed(e.getMessage());
+            }
+        });
     }
 
     @Override
     public void onAllSalonsFailed(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBranchLoadSuccess(List<Salon> salons) {
+        MySalonAdapter adapter = new MySalonAdapter(getActivity(), salons);
+        recyclerSalon.setAdapter(adapter);
+        recyclerSalon.setVisibility(View.VISIBLE);
+        dialog.dismiss();
+    }
+
+    @Override
+    public void onBranchLoadFailed(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
     }
 }
