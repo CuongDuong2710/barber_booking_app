@@ -140,7 +140,9 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
                 List<Salon> salons = new ArrayList<>();
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
-                        salons.add(documentSnapshot.toObject(Salon.class));
+                        Salon salon = documentSnapshot.toObject(Salon.class);
+                        salon.setSalonId(documentSnapshot.getId());
+                        salons.add(salon);
                     }
                     iBranchLoadListener.onBranchLoadSuccess(salons);
                 }
