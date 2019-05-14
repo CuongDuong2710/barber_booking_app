@@ -10,4 +10,5 @@ public class Common {
     public static User currentUser;
     public static int totalBookingSteps = 4;
     public static Salon currentSalon;
+    public static int step = 0; // init first step is 0
 }

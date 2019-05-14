@@ -35,9 +35,27 @@ public class BookingActivity extends AppCompatActivity {
     @BindView(R.id.btn_next_step)
     Button btnNextStep;
 
+    @OnClick(R.id.btn_previous_step)
+    void previousStep() {
+        if (Common.step == 3 || Common.step > 0) {
+            Common.step--;
+            viewPager.setCurrentItem(Common.step);
+        }
+    }
+
     @OnClick(R.id.btn_next_step)
     void nextClick() {
-        Toast.makeText(this, "" + Common.currentSalon.getSalonId(), Toast.LENGTH_SHORT).show();
+        if (Common.step < 3 || Common.step == 0) {
+
+            Common.step++;
+            if (Common.step == 1) { // after choose salon
+                loadBarberBySalon(Common.currentSalon.getSalonId());
+            }
+            viewPager.setCurrentItem(Common.step);
+        }
+    }
+
+    private void loadBarberBySalon(String salonId) {
     }
 
     LocalBroadcastManager localBroadcastManager;
@@ -73,6 +91,7 @@ public class BookingActivity extends AppCompatActivity {
 
         // view pager
         viewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager()));
+        viewPager.setOffscreenPageLimit(4); // we have 4 fragment so we need keep state of this 4 screen page when press previous button
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -81,6 +100,8 @@ public class BookingActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int page) {
+                // show step
+                stepView.go(page, true);
                 if (page == 0)
                     btnPreviousStep.setEnabled(false);
                 else
