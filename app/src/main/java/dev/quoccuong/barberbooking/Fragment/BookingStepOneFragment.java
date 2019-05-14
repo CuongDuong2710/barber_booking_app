@@ -29,6 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dev.quoccuong.barberbooking.Adapter.MySalonAdapter;
+import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Common.SpacesItemDecoration;
 import dev.quoccuong.barberbooking.Interface.IAllSalonsLoadListener;
 import dev.quoccuong.barberbooking.Interface.IBranchLoadListener;
@@ -128,6 +129,8 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
 
     private void loadBranchOfCity(String cityName) {
         dialog.show();
+
+        Common.city = cityName;
 
         branchRef = FirebaseFirestore.getInstance()
                 .collection("AllSalon")

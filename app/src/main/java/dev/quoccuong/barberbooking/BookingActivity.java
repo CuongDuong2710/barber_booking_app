@@ -1,17 +1,25 @@
 package dev.quoccuong.barberbooking;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.quoccuong.barberbooking.R;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.shuhart.stepview.StepView;
 
 import java.util.ArrayList;
@@ -23,6 +31,8 @@ import butterknife.OnClick;
 import dev.quoccuong.barberbooking.Adapter.MyViewPagerAdapter;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Common.NonSwipeViewPager;
+import dev.quoccuong.barberbooking.Model.Barber;
+import dmax.dialog.SpotsDialog;
 
 public class BookingActivity extends AppCompatActivity {
 
@@ -34,6 +44,10 @@ public class BookingActivity extends AppCompatActivity {
     Button btnPreviousStep;
     @BindView(R.id.btn_next_step)
     Button btnNextStep;
+
+    AlertDialog dialog;
+    CollectionReference barberRef;
+
 
     @OnClick(R.id.btn_previous_step)
     void previousStep() {
@@ -56,6 +70,43 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void loadBarberBySalon(String salonId) {
+        dialog.show();
+
+        // Now, select all barbers of salon
+        // /AllSalon/NewYork/Branch/4sUEoGnpzMwY8ts5AbbQ/Barbers
+        barberRef = FirebaseFirestore.getInstance()
+                .collection("AllSalon")
+                .document(Common.city)
+                .collection("Branch")
+                .document(salonId)
+                .collection("Barbers");
+
+        barberRef.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        ArrayList<Barber> barbers = new ArrayList<>();
+                        for (QueryDocumentSnapshot barberSnapshot : task.getResult()) {
+                            Barber barber = barberSnapshot.toObject(Barber.class);
+                            barber.setPassword(""); // remove password because in client app
+                            barber.setBarberID(barberSnapshot.getId());
+
+                            barbers.add(barber);
+                        }
+
+                        // send broadcast to BookingStepTwoFragment to load Recycler
+                        Intent intent = new Intent(Common.KEY_BARBER_LOAD_DONE);
+                        intent.putParcelableArrayListExtra(Common.KEY_BARBER_LOAD_DONE, barbers);
+                        localBroadcastManager.sendBroadcast(intent);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                dialog.dismiss();
+            }
+        });
+
+
     }
 
     LocalBroadcastManager localBroadcastManager;
@@ -81,6 +132,8 @@ public class BookingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking);
         ButterKnife.bind(BookingActivity.this);
+
+        dialog = new SpotsDialog.Builder().setContext(this).build();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(buttonNextReceiver, new IntentFilter(Common.KEY_ENABLE_NEXT_BUTTON));
