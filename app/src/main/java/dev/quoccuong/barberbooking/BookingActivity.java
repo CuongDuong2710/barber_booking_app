@@ -1,10 +1,16 @@
 package dev.quoccuong.barberbooking;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.quoccuong.barberbooking.R;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.shuhart.stepview.StepView;
 
@@ -13,7 +19,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import dev.quoccuong.barberbooking.Adapter.MyViewPagerAdapter;
+import dev.quoccuong.barberbooking.Common.Common;
 
 public class BookingActivity extends AppCompatActivity {
 
@@ -26,11 +34,37 @@ public class BookingActivity extends AppCompatActivity {
     @BindView(R.id.btn_next_step)
     Button btnNextStep;
 
+    @OnClick(R.id.btn_next_step)
+    void nextClick() {
+        Toast.makeText(this, "" + Common.currentSalon.getSalonId(), Toast.LENGTH_SHORT).show();
+    }
+
+    LocalBroadcastManager localBroadcastManager;
+
+    // Broadcast Receiver
+    private BroadcastReceiver buttonNextReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Common.currentSalon = intent.getParcelableExtra(Common.KEY_SALON_STORE);
+            btnNextStep.setEnabled(true);
+            setColorNextButton();
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        localBroadcastManager.unregisterReceiver(buttonNextReceiver);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking);
         ButterKnife.bind(BookingActivity.this);
+
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(buttonNextReceiver, new IntentFilter(Common.KEY_ENABLE_NEXT_BUTTON));
 
         setupSetView();
         setColorNextButton();
