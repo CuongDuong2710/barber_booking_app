@@ -22,13 +22,14 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import dev.quoccuong.barberbooking.Adapter.MyViewPagerAdapter;
 import dev.quoccuong.barberbooking.Common.Common;
+import dev.quoccuong.barberbooking.Common.NonSwipeViewPager;
 
 public class BookingActivity extends AppCompatActivity {
 
     @BindView(R.id.step_view)
     StepView stepView;
     @BindView(R.id.view_pager)
-    ViewPager viewPager;
+    NonSwipeViewPager viewPager;
     @BindView(R.id.btn_previous_step)
     Button btnPreviousStep;
     @BindView(R.id.btn_next_step)

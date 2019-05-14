@@ -24,7 +24,7 @@
         app:sv_stepPadding="12dp"
         app:sv_typeface="@font/bellerose" />
 
-    <android.support.v4.view.ViewPager
+    <dev.quoccuong.barberbooking.Common.NonSwipeViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
