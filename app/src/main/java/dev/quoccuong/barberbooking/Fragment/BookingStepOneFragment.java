@@ -68,7 +68,7 @@ public class BookingStepOneFragment extends Fragment implements IAllSalonsLoadLi
         iAllSalonsLoadListener = this;
         iBranchLoadListener = this;
 
-        dialog = new SpotsDialog.Builder().setContext(getActivity()).build();
+        dialog = new SpotsDialog.Builder().setContext(getActivity()).setCancelable(false).build();
     }
 
     @Nullable
