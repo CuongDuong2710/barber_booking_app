@@ -63,6 +63,7 @@ public class MySalonAdapter extends RecyclerView.Adapter<MySalonAdapter.MyViewHo
                 // send broadcast to tell BookingActivity enable 'Next' button
                 Intent intent = new Intent(Common.KEY_ENABLE_NEXT_BUTTON);
                 intent.putExtra(Common.KEY_SALON_STORE, salons.get(pos));
+                intent.putExtra(Common.KEY_STEP, 1);
                 localBroadcastManager.sendBroadcast(intent);
             }
         });
