@@ -4,44 +4,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Salon implements Parcelable {
-    private String name, address, salonId;
-
-    public Salon() {
-    }
-
-    public Salon(String name, String address, String salonId) {
-        this.name = name;
-        this.address = address;
-        this.salonId = salonId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getSalonId() {
-        return salonId;
-    }
-
-    public void setSalonId(String salonId) {
-        this.salonId = salonId;
-    }
+    private String name, address, website, phone, openHours, salonId;
 
     protected Salon(Parcel in) {
         name = in.readString();
         address = in.readString();
+        website = in.readString();
+        phone = in.readString();
+        openHours = in.readString();
         salonId = in.readString();
     }
 
@@ -66,6 +36,57 @@ public class Salon implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(name);
         parcel.writeString(address);
+        parcel.writeString(website);
+        parcel.writeString(phone);
+        parcel.writeString(openHours);
         parcel.writeString(salonId);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getOpenHours() {
+        return openHours;
+    }
+
+    public void setOpenHours(String openHours) {
+        this.openHours = openHours;
+    }
+
+    public String getSalonId() {
+        return salonId;
+    }
+
+    public void setSalonId(String salonId) {
+        this.salonId = salonId;
     }
 }
