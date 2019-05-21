@@ -6,6 +6,18 @@ import android.os.Parcelable;
 public class Salon implements Parcelable {
     private String name, address, website, phone, openHours, salonId;
 
+    public Salon() {
+    }
+
+    public Salon(String name, String address, String website, String phone, String openHours, String salonId) {
+        this.name = name;
+        this.address = address;
+        this.website = website;
+        this.phone = phone;
+        this.openHours = openHours;
+        this.salonId = salonId;
+    }
+
     protected Salon(Parcel in) {
         name = in.readString();
         address = in.readString();

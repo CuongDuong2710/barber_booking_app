@@ -1,5 +1,6 @@
 package dev.quoccuong.barberbooking.Common;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import dev.quoccuong.barberbooking.Model.Barber;
@@ -26,6 +27,7 @@ public class Common {
     public static String city = "";
     public static int currentTimeSlot = -1;
     public static Calendar currentDate = Calendar.getInstance();
+    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd_MM_yyyy"); // only use when need format key
 
     public static String convertTimeSlotToString(int slot) {
         switch (slot) {
