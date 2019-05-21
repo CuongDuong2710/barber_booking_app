@@ -56,7 +56,6 @@ public class BookingStepThreeFragment extends Fragment implements ITimeSlotLoadL
 
     Unbinder unbinder;
     LocalBroadcastManager localBroadcastManager;
-    Calendar selectedDate;
 
     @BindView(R.id.recycler_time_slot)
     RecyclerView recyclerViewTimeSlot;
@@ -151,9 +150,6 @@ public class BookingStepThreeFragment extends Fragment implements ITimeSlotLoadL
         simpleDateFormat = new SimpleDateFormat("dd_MM_yyyy");
 
         dialog = new SpotsDialog.Builder().setContext(getContext()).setCancelable(false).build();
-
-        selectedDate = Calendar.getInstance();
-        selectedDate.add(Calendar.DATE, 0);
     }
 
     @Override
@@ -196,8 +192,8 @@ public class BookingStepThreeFragment extends Fragment implements ITimeSlotLoadL
         horizontalCalendar.setCalendarListener(new HorizontalCalendarListener() {
             @Override
             public void onDateSelected(Calendar date, int position) {
-                if (selectedDate.getTimeInMillis() != date.getTimeInMillis()) {
-                    selectedDate = date; // this code will not load again if you selected new day same with selected day
+                if (Common.currentDate.getTimeInMillis() != date.getTimeInMillis()) {
+                    Common.currentDate = date; // this code will not load again if you selected new day same with selected day
                     loadAvailableTimeSlotOfBarber(Common.currentBarber.getBarberID(),
                             simpleDateFormat.format(date.getTime()));
                 }
