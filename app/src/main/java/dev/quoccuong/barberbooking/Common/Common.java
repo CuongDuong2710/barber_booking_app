@@ -1,5 +1,7 @@
 package dev.quoccuong.barberbooking.Common;
 
+import java.util.Calendar;
+
 import dev.quoccuong.barberbooking.Model.Barber;
 import dev.quoccuong.barberbooking.Model.Salon;
 import dev.quoccuong.barberbooking.Model.User;
@@ -12,6 +14,9 @@ public class Common {
     public static final String KEY_BARBER_SELECTED = "BARBER_SELECTED";
     public static final String KEY_DISPLAY_TIME_SLOT = "DISPLAY_TIME_SLOT";
     public static final String KEY_STEP = "STEP";
+    public static final String DISABLE_SELECTED = "DISABLE_SELECTED";
+    public static final String KEY_TIME_SLOT = "TIME_SLOT";
+    public static final String KEY_CONFIRM_BOOKING = "CONFIRM_BOOKING";
     public static String IS_LOGIN = "IsLogin";
     public static User currentUser;
     public static int totalBookingSteps = 4;
@@ -19,6 +24,8 @@ public class Common {
     public static Barber currentBarber;
     public static int step = 0; // init first step is 0
     public static String city = "";
+    public static int currentTimeSlot = -1;
+    public static Calendar currentDate = Calendar.getInstance();
 
     public static String convertTimeSlotToString(int slot) {
         switch (slot) {
