@@ -1,5 +1,6 @@
 package dev.quoccuong.barberbooking.Fragment;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,10 +18,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -31,6 +37,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Model.BookingInformation;
+import dmax.dialog.SpotsDialog;
 
 public class BookingStepFourFragment extends Fragment {
 
@@ -40,6 +47,7 @@ public class BookingStepFourFragment extends Fragment {
     LocalBroadcastManager localBroadcastManager;
 
     Unbinder unbinder;
+    AlertDialog dialog;
 
     @BindView(R.id.txt_booking_barber_text)
     TextView txtBarberName;
@@ -60,10 +68,28 @@ public class BookingStepFourFragment extends Fragment {
 
     @OnClick(R.id.btn_confirm)
     void confirmBooking() {
-        BookingInformation bookingInformation = new BookingInformation();
+        dialog.show();
 
+        // process Timestamp
+        // we will use Timestamp to filter all booking with date is greater today
+        // for only display all future booking
+        String startTime = Common.convertTimeSlotToString(Common.currentTimeSlot);
+        String[] convertTime = startTime.split("-"); // split ex: 9:00-9:30
+        // get start time: get 9:00
+        String[] startTimeConvert = convertTime[0].split(":");
+        int startHourInt = Integer.parseInt(startTimeConvert[0].trim()); // get '9'
+        int startMinInt = Integer.parseInt(startTimeConvert[1].trim()); // get '00'
 
+        Calendar bookingDateWithOurHouse = Calendar.getInstance();
+        bookingDateWithOurHouse.setTimeInMillis(Common.bookingDate.getTimeInMillis());
+        bookingDateWithOurHouse.set(Calendar.HOUR_OF_DAY, startHourInt);
+        bookingDateWithOurHouse.set(Calendar.MINUTE, startMinInt);
 
+        // create Timestamp and apply to BookingInformation
+        Timestamp timestamp = new Timestamp(bookingDateWithOurHouse.getTime());
+
+        final BookingInformation bookingInformation = new BookingInformation();
+        bookingInformation.setTimestamp(timestamp);
         bookingInformation.setDone(false); // always false, use to filter display on user
         bookingInformation.setBarberId(Common.currentBarber.getBarberID());
         bookingInformation.setBarberName(Common.currentBarber.getName());
@@ -74,7 +100,7 @@ public class BookingStepFourFragment extends Fragment {
         bookingInformation.setSalonAddress(Common.currentSalon.getAddress());
         bookingInformation.setTime(new StringBuilder(Common.convertTimeSlotToString(Common.currentTimeSlot))
                 .append(" at ")
-                .append(simpleDateFormat.format(Common.bookingDate.getTime())).toString());
+                .append(simpleDateFormat.format(bookingDateWithOurHouse.getTime())).toString());
         bookingInformation.setSlot(Long.valueOf(Common.currentTimeSlot));
 
         // submit to Barber document
@@ -93,9 +119,9 @@ public class BookingStepFourFragment extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        resetStaticData();
-                        getActivity().finish();
-                        Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT).show();
+                        // here we can write an function to check
+                        // if already exist an booking, we will prevent new booking
+                        addToUserBooking(bookingInformation);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -103,6 +129,58 @@ public class BookingStepFourFragment extends Fragment {
                 Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void addToUserBooking(final BookingInformation bookingInformation) {
+
+
+        // first, create new booking for user
+        final CollectionReference userBooking = FirebaseFirestore.getInstance()
+                .collection("User")
+                .document(Common.currentUser.getPhoneNumber())
+                .collection("Booking");
+
+        // check if exist document in this collection
+        userBooking.whereEqualTo("done", false) // if have any document with field done = false
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.getResult().isEmpty()) {
+                            // set data
+                            userBooking.document()
+                                    .set(bookingInformation)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            dismissDialog();
+                                            resetDataAndFinish();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            dismissDialog();
+                                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        } else {
+                            dismissDialog();
+                            resetDataAndFinish();
+                        }
+                    }
+                });
+    }
+
+    private void resetDataAndFinish() {
+        resetStaticData();
+        getActivity().finish();
+        Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT).show();
+    }
+
+    private void dismissDialog() {
+        if (dialog.isShowing())
+            dialog.dismiss();
     }
 
     private void resetStaticData() {
@@ -146,6 +224,8 @@ public class BookingStepFourFragment extends Fragment {
 
         localBroadcastManager = LocalBroadcastManager.getInstance(getContext());
         localBroadcastManager.registerReceiver(confirmBookingReceiver, new IntentFilter(Common.KEY_CONFIRM_BOOKING));
+
+        dialog = new SpotsDialog.Builder().setContext(getContext()).setCancelable(false).build();
     }
 
     @Override
