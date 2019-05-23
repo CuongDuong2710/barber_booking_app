@@ -1,9 +1,11 @@
 package dev.quoccuong.barberbooking;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+
 import dev.quoccuong.barberbooking.Common.Common;
 
 import android.quoccuong.barberbooking.R;
@@ -22,9 +24,15 @@ import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,14 +86,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AccessToken accessToken = AccountKit.getCurrentAccessToken();
+        Dexter.withActivity(this)
+                .withPermissions(new String[]{
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR
+                }).withListener(new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport report) {
+                AccessToken accessToken = AccountKit.getCurrentAccessToken();
 
-        if (accessToken != null) {
-            loginToHome();
-        } else {
-            setContentView(R.layout.activity_main);
-            ButterKnife.bind(MainActivity.this);
-        }
+                if (accessToken != null) {
+                    loginToHome();
+                } else {
+                    setContentView(R.layout.activity_main);
+                    ButterKnife.bind(MainActivity.this);
+                }
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+
+            }
+        }).check();
+
     }
 
     private void loginToHome() {
