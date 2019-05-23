@@ -66,24 +66,22 @@ public class BookingStepFourFragment extends Fragment {
     @BindView(R.id.btn_confirm)
     Button btnConfirm;
 
+    // "9:00 - 9:30"
+    int startHour; // 9
+    int startMin; // 00
+    int endHour; // 9
+    int endMin; // 30
+
     @OnClick(R.id.btn_confirm)
     void confirmBooking() {
         dialog.show();
 
-        // process Timestamp
-        // we will use Timestamp to filter all booking with date is greater today
-        // for only display all future booking
-        String startTime = Common.convertTimeSlotToString(Common.currentTimeSlot);
-        String[] convertTime = startTime.split("-"); // split ex: 9:00-9:30
-        // get start time: get 9:00
-        String[] startTimeConvert = convertTime[0].split(":");
-        int startHourInt = Integer.parseInt(startTimeConvert[0].trim()); // get '9'
-        int startMinInt = Integer.parseInt(startTimeConvert[1].trim()); // get '00'
+        getStartEndOfHourAndMinute();
 
         Calendar bookingDateWithOurHouse = Calendar.getInstance();
         bookingDateWithOurHouse.setTimeInMillis(Common.bookingDate.getTimeInMillis());
-        bookingDateWithOurHouse.set(Calendar.HOUR_OF_DAY, startHourInt);
-        bookingDateWithOurHouse.set(Calendar.MINUTE, startMinInt);
+        bookingDateWithOurHouse.set(Calendar.HOUR_OF_DAY, startHour);
+        bookingDateWithOurHouse.set(Calendar.MINUTE, startMin);
 
         // create Timestamp and apply to BookingInformation
         Timestamp timestamp = new Timestamp(bookingDateWithOurHouse.getTime());
@@ -131,8 +129,23 @@ public class BookingStepFourFragment extends Fragment {
         });
     }
 
-    private void addToUserBooking(final BookingInformation bookingInformation) {
+    private void getStartEndOfHourAndMinute() {
+        // process Timestamp
+        // we will use Timestamp to filter all booking with date is greater today
+        // for only display all future booking
+        String startTime = Common.convertTimeSlotToString(Common.currentTimeSlot);
+        String[] convertTime = startTime.split("-"); // split ex: 9:00-9:30
 
+        String[] startTimeConvert = convertTime[0].split(":"); // 9:00
+        startHour = Integer.parseInt(startTimeConvert[0].trim()); // get '9'
+        startMin = Integer.parseInt(startTimeConvert[1].trim()); // get '00'
+
+        String[] endTimeConvert = convertTime[1].split(":"); // 9:30
+        endHour = Integer.parseInt(endTimeConvert[0].trim()); // 9
+        endMin = Integer.parseInt(endTimeConvert[1].trim()); // 30
+    }
+
+    private void addToUserBooking(final BookingInformation bookingInformation) {
 
         // first, create new booking for user
         final CollectionReference userBooking = FirebaseFirestore.getInstance()
@@ -153,6 +166,7 @@ public class BookingStepFourFragment extends Fragment {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
+                                            addToCalenderOfDevice(Common.bookingDate, Common.convertTimeSlotToString(Common.currentTimeSlot));
                                             dismissDialog();
                                             resetDataAndFinish();
                                         }
@@ -170,6 +184,35 @@ public class BookingStepFourFragment extends Fragment {
                         }
                     }
                 });
+    }
+
+    private void addToCalenderOfDevice(Calendar bookingDate, String startTime) {
+        Calendar startEvent = Calendar.getInstance();
+        startEvent.setTimeInMillis(bookingDate.getTimeInMillis());
+        startEvent.set(Calendar.HOUR_OF_DAY, startHour);
+        startEvent.set(Calendar.MINUTE, startMin);
+
+        Calendar endEvent = Calendar.getInstance();
+        endEvent.setTimeInMillis(bookingDate.getTimeInMillis());
+        endEvent.set(Calendar.HOUR_OF_DAY, endHour);
+        endEvent.set(Calendar.MINUTE, endMin);
+
+        // convert Calendar to String
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        String startEventTime = sdf.format(startEvent.getTime());
+        String endEventTime = sdf.format(endEvent.getTime());
+
+        addToDevice(startEventTime, endEventTime, "Haircut Booking",
+                new StringBuilder("Hair cut from")
+                        .append(startTime)
+                        .append(" with ")
+                        .append(Common.currentBarber.getName())
+                        .append(" at ")
+                        .append(Common.currentSalon.getName()).toString(),
+                new StringBuilder("Address: ").append(Common.currentSalon.getAddress()));
+    }
+
+    private void addToDevice(String startEventTime, String endEventTime, String title, String description, StringBuilder address) {
     }
 
     private void resetDataAndFinish() {
