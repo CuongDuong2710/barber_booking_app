@@ -62,6 +62,9 @@ public class BookingStepFourFragment extends Fragment {
     void confirmBooking() {
         BookingInformation bookingInformation = new BookingInformation();
 
+
+
+        bookingInformation.setDone(false); // always false, use to filter display on user
         bookingInformation.setBarberId(Common.currentBarber.getBarberID());
         bookingInformation.setBarberName(Common.currentBarber.getName());
         bookingInformation.setCustomerName(Common.currentUser.getName());
@@ -71,7 +74,7 @@ public class BookingStepFourFragment extends Fragment {
         bookingInformation.setSalonAddress(Common.currentSalon.getAddress());
         bookingInformation.setTime(new StringBuilder(Common.convertTimeSlotToString(Common.currentTimeSlot))
                 .append(" at ")
-                .append(simpleDateFormat.format(Common.currentDate.getTime())).toString());
+                .append(simpleDateFormat.format(Common.bookingDate.getTime())).toString());
         bookingInformation.setSlot(Long.valueOf(Common.currentTimeSlot));
 
         // submit to Barber document
@@ -82,7 +85,7 @@ public class BookingStepFourFragment extends Fragment {
                 .document(Common.currentSalon.getSalonId())
                 .collection("Barbers")
                 .document(Common.currentBarber.getBarberID())
-                .collection(Common.simpleDateFormat.format(Common.currentDate.getTime()))
+                .collection(Common.simpleDateFormat.format(Common.bookingDate.getTime()))
                 .document(String.valueOf(Common.currentTimeSlot));
 
         // write data
@@ -107,7 +110,7 @@ public class BookingStepFourFragment extends Fragment {
         Common.currentTimeSlot = -1;
         Common.currentSalon = null;
         Common.currentBarber = null;
-        Common.currentDate.add(Calendar.DATE, 0);
+        Common.bookingDate.add(Calendar.DATE, 0);
     }
 
     public static BookingStepFourFragment getInstance() {
@@ -127,7 +130,7 @@ public class BookingStepFourFragment extends Fragment {
         txtBarberName.setText(Common.currentBarber.getName());
         txtBookingTime.setText(new StringBuilder(Common.convertTimeSlotToString(Common.currentTimeSlot))
                 .append(" at ")
-                .append(simpleDateFormat.format(Common.currentDate.getTime())));
+                .append(simpleDateFormat.format(Common.bookingDate.getTime())));
         txtSalonAddress.setText(Common.currentSalon.getAddress());
         txtSalonWebsite.setText(Common.currentSalon.getWebsite());
         txtSalonName.setText(Common.currentSalon.getName());

@@ -26,7 +26,7 @@ public class Common {
     public static int step = 0; // init first step is 0
     public static String city = "";
     public static int currentTimeSlot = -1;
-    public static Calendar currentDate = Calendar.getInstance();
+    public static Calendar bookingDate = Calendar.getInstance();
     public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd_MM_yyyy"); // only use when need format key
 
     public static String convertTimeSlotToString(int slot) {
