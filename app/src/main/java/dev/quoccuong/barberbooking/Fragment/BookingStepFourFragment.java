@@ -2,10 +2,15 @@ package dev.quoccuong.barberbooking.Fragment;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,8 +33,11 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,6 +79,8 @@ public class BookingStepFourFragment extends Fragment {
     int startMin; // 00
     int endHour; // 9
     int endMin; // 30
+
+    Uri calendarsUri = Uri.parse("content://com.android.calendar/calendars");
 
     @OnClick(R.id.btn_confirm)
     void confirmBooking() {
@@ -209,10 +219,62 @@ public class BookingStepFourFragment extends Fragment {
                         .append(Common.currentBarber.getName())
                         .append(" at ")
                         .append(Common.currentSalon.getName()).toString(),
-                new StringBuilder("Address: ").append(Common.currentSalon.getAddress()));
+                new StringBuilder("Address: ").append(Common.currentSalon.getAddress()).toString());
     }
 
-    private void addToDevice(String startEventTime, String endEventTime, String title, String description, StringBuilder address) {
+    private void addToDevice(String startEventTime, String endEventTime, String title, String description, String address) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+
+        try {
+            Date start = sdf.parse(startEventTime);
+            Date end = sdf.parse(endEventTime);
+
+            ContentValues event = new ContentValues();
+
+            // put
+            event.put(CalendarContract.Events.CALENDAR_ID, getCalendar(getContext()));
+            event.put(CalendarContract.Events.TITLE, title);
+            event.put(CalendarContract.Events.DESCRIPTION, description);
+            event.put(CalendarContract.Events.EVENT_LOCATION, address);
+
+            // time
+            event.put(CalendarContract.Events.DTSTART, start.getTime());
+            event.put(CalendarContract.Events.DTEND, end.getTime());
+            event.put(CalendarContract.Events.ALL_DAY, 0);
+            event.put(CalendarContract.Events.HAS_ALARM, 1);
+
+            String timeZone = TimeZone.getDefault().getID();
+            event.put(CalendarContract.Events.EVENT_TIMEZONE, timeZone);
+
+            getActivity().getContentResolver().insert(calendarsUri, event);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getCalendar(Context context) {
+        // get default calendar ID of Calendar Gmail
+        String gmailIdCalendar = "";
+        String protection[] = {"_id", "calendar_displayName"};
+
+        ContentResolver contentResolver = context.getContentResolver();
+        // select all calendar
+        Cursor cursor = contentResolver.query(calendarsUri, protection, null, null, null);
+        if (cursor.moveToFirst()) {
+            String calName;
+            int nameCol = cursor.getColumnIndex(protection[1]);
+            int idCol = cursor.getColumnIndex(protection[0]);
+            do {
+                calName = cursor.getString(nameCol);
+                if (calName.contains("@gmail.com")) {
+                    gmailIdCalendar = cursor.getString(idCol);
+                    break;
+                }
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return  gmailIdCalendar;
     }
 
     private void resetDataAndFinish() {
