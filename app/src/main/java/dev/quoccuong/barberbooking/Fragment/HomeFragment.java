@@ -109,7 +109,8 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
 
         Timestamp toDayTimestamp = new Timestamp(calendar.getTime());
 
-        // select booking information from Firebase with done = false and timestamp greater today
+        // select booking information from Firebase with filter done = false and timestamp greater today
+        // -> need add index to Firebase
         userBooking
                 .whereGreaterThanOrEqualTo("timestamp", toDayTimestamp)
                 .whereEqualTo("done", false)
@@ -245,6 +246,10 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
 
     @Override
     public void onBookingInfoLoadSuccess(BookingInformation bookingInformation) {
+        cardViewBookingInfo.setVisibility(View.VISIBLE
+
+
+        );
         txtSalonAddress.setText(bookingInformation.getSalonAddress());
         txtSalonBarber.setText(bookingInformation.getBarberName());
         txtTime.setText(bookingInformation.getTime());

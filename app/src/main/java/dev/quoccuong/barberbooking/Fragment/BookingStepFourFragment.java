@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.quoccuong.barberbooking.R;
@@ -16,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,8 +81,6 @@ public class BookingStepFourFragment extends Fragment {
     int startMin; // 00
     int endHour; // 9
     int endMin; // 30
-
-    Uri calendarsUri = Uri.parse("content://com.android.calendar/calendars");
 
     @OnClick(R.id.btn_confirm)
     void confirmBooking() {
@@ -246,7 +246,8 @@ public class BookingStepFourFragment extends Fragment {
             String timeZone = TimeZone.getDefault().getID();
             event.put(CalendarContract.Events.EVENT_TIMEZONE, timeZone);
 
-            getActivity().getContentResolver().insert(calendarsUri, event);
+            getActivity().getContentResolver().insert(getCalendarsUri(), event);
+            Log.d("CuongDNQ", "insert: " + getActivity().getContentResolver().insert(getCalendarsUri(), event));
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -260,7 +261,7 @@ public class BookingStepFourFragment extends Fragment {
 
         ContentResolver contentResolver = context.getContentResolver();
         // select all calendar
-        Cursor cursor = contentResolver.query(calendarsUri, protection, null, null, null);
+        Cursor cursor = contentResolver.query(getCalendarsUri(), protection, null, null, null);
         if (cursor.moveToFirst()) {
             String calName;
             int nameCol = cursor.getColumnIndex(protection[1]);
@@ -268,6 +269,7 @@ public class BookingStepFourFragment extends Fragment {
             do {
                 calName = cursor.getString(nameCol);
                 if (calName.contains("@gmail.com")) {
+                    Log.d("CuongDNQ", "calName: " + calName);
                     gmailIdCalendar = cursor.getString(idCol);
                     break;
                 }
@@ -275,6 +277,19 @@ public class BookingStepFourFragment extends Fragment {
             cursor.close();
         }
         return  gmailIdCalendar;
+    }
+
+    private Uri getCalendarsUri() {
+        Uri calendarsUri;
+
+        if (Build.VERSION.SDK_INT >= 8)
+            calendarsUri = Uri.parse("content://com.android.calendar/events");
+        else
+            calendarsUri = Uri.parse("content://calendar/events");
+
+        Log.d("CuongDNQ", "uri: " + calendarsUri);
+
+        return calendarsUri;
     }
 
     private void resetDataAndFinish() {
