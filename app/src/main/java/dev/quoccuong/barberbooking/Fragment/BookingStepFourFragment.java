@@ -262,12 +262,18 @@ public class BookingStepFourFragment extends Fragment {
             String timeZone = TimeZone.getDefault().getID();
             event.put(CalendarContract.Events.EVENT_TIMEZONE, timeZone);
 
+            Log.d("CuongDNQ", "event: " + event.toString());
+
             Uri uri_save = getActivity().getContentResolver().insert(getCalendarsUri(), event);
             Log.d("CuongDNQ", "insert: " + getActivity().getContentResolver().insert(getCalendarsUri(), event));
 
             // save to cache
             Paper.init(getActivity());
             Paper.book().write(Common.EVENT_URI_CACHE, uri_save.toString());
+
+            Log.d("CuongDNQ", "Paper.book(): " + Paper.book().toString());
+            Log.d("CuongDNQ", "Paper.book().write: " + Paper.book().write(Common.EVENT_URI_CACHE, uri_save.toString()));
+
 
         } catch (ParseException e) {
             e.printStackTrace();

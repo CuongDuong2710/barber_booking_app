@@ -2,6 +2,7 @@ package dev.quoccuong.barberbooking.Fragment;
 
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +51,7 @@ import dev.quoccuong.barberbooking.Model.Banner;
 import dev.quoccuong.barberbooking.Model.BookingInformation;
 import dev.quoccuong.barberbooking.Model.LookBook;
 import dev.quoccuong.barberbooking.Service.PicassoImageLoadingService;
+import io.paperdb.Paper;
 import ss.com.bannerslider.Slider;
 
 
@@ -113,11 +116,43 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                 public void onSuccess(Void aVoid) {
                     // after delete on Barber done
                     // delete from User
-
+                    deleteBookingFromUser();
                 }
             });
         } else {
             Toast.makeText(getContext(), "Current booking must not be null", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void deleteBookingFromUser() {
+        // get information from User object
+        if (!TextUtils.isEmpty(Common.currentBookingId)) {
+            DocumentReference userBookingInfo = FirebaseFirestore.getInstance()
+                    .collection("User")
+                    .document(Common.currentUser.getPhoneNumber())
+                    .collection("Booking")
+                    .document(Common.currentBookingId);
+
+            userBookingInfo.delete().addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // after delete on "User", delete events from Calendar
+                    // First, get save Uri of event from cache
+                    Paper.init(getActivity());
+                    Uri eventUri = Uri.parse(Paper.book().read(Common.EVENT_URI_CACHE).toString());
+                    getActivity().getContentResolver().delete(eventUri, null, null);
+
+                    Toast.makeText(getContext(), "Success delete booking!", Toast.LENGTH_SHORT).show();
+
+                    // refresh
+                    loadUserBooking();
+                }
+            });
         }
     }
 
