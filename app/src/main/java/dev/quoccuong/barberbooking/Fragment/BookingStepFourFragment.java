@@ -1,5 +1,6 @@
 package dev.quoccuong.barberbooking.Fragment;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -7,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.provider.CalendarContract;
 import android.quoccuong.barberbooking.R;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -48,6 +51,7 @@ import butterknife.Unbinder;
 import dev.quoccuong.barberbooking.Common.Common;
 import dev.quoccuong.barberbooking.Model.BookingInformation;
 import dmax.dialog.SpotsDialog;
+import io.paperdb.Paper;
 
 public class BookingStepFourFragment extends Fragment {
 
@@ -97,6 +101,7 @@ public class BookingStepFourFragment extends Fragment {
         Timestamp timestamp = new Timestamp(bookingDateWithOurHouse.getTime());
 
         final BookingInformation bookingInformation = new BookingInformation();
+        bookingInformation.setCity(Common.city);
         bookingInformation.setTimestamp(timestamp);
         bookingInformation.setDone(false); // always false, use to filter display on user
         bookingInformation.setBarberId(Common.currentBarber.getBarberID());
@@ -163,8 +168,19 @@ public class BookingStepFourFragment extends Fragment {
                 .document(Common.currentUser.getPhoneNumber())
                 .collection("Booking");
 
+        // get current date
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 0);
+        calendar.add(Calendar.HOUR_OF_DAY, 0);
+        calendar.add(Calendar.MINUTE, 0);
+
+        Timestamp toDayTimestamp = new Timestamp(calendar.getTime());
+
         // check if exist document in this collection
-        userBooking.whereEqualTo("done", false) // if have any document with field done = false
+        userBooking
+                .whereGreaterThanOrEqualTo("timestamp", toDayTimestamp)
+                .whereEqualTo("done", false)
+                .limit(1) // only take 1
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -246,8 +262,12 @@ public class BookingStepFourFragment extends Fragment {
             String timeZone = TimeZone.getDefault().getID();
             event.put(CalendarContract.Events.EVENT_TIMEZONE, timeZone);
 
-            getActivity().getContentResolver().insert(getCalendarsUri(), event);
+            Uri uri_save = getActivity().getContentResolver().insert(getCalendarsUri(), event);
             Log.d("CuongDNQ", "insert: " + getActivity().getContentResolver().insert(getCalendarsUri(), event));
+
+            // save to cache
+            Paper.init(getActivity());
+            Paper.book().write(Common.EVENT_URI_CACHE, uri_save.toString());
 
         } catch (ParseException e) {
             e.printStackTrace();

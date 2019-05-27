@@ -3,7 +3,7 @@ package dev.quoccuong.barberbooking.Model;
 import com.google.firebase.Timestamp;
 
 public class BookingInformation {
-    private String customerName, customerPhone, time, barberId, barberName, salonId, salonName, salonAddress;
+    private String city, customerName, customerPhone, time, barberId, barberName, salonId, salonName, salonAddress;
     private Long slot;
     private Timestamp timestamp;
     private boolean done;
@@ -109,5 +109,13 @@ public class BookingInformation {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }

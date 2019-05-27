@@ -13,6 +13,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,9 +21,11 @@ import android.widget.Toast;
 import com.facebook.accountkit.AccountKit;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -75,6 +78,49 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     TextView txtTime;
     @BindView(R.id.txt_time_remain)
     TextView txtTimeRemain;
+    @BindView(R.id.btn_delete_booking)
+    Button btnDeleteBooking;
+
+    @OnClick(R.id.btn_delete_booking)
+    void deleteBooking() {
+        deleteBookingFromBarber();
+    }
+
+    private void deleteBookingFromBarber() {
+        /* First, we delete from Barber collection -> User collection -> event calendar */
+
+        // load Common.currentBooking because we need some data from BookingInformation
+        if (Common.currentBooking != null) {
+            // get Booking information in barber object
+            DocumentReference barberBookingInfo = FirebaseFirestore.getInstance()
+                    .collection("AllSalon")
+                    .document(Common.currentBooking.getCity())
+                    .collection("Branch")
+                    .document(Common.currentBooking.getSalonId())
+                    .collection("Barber")
+                    .document(Common.currentBooking.getBarberId())
+                    .collection(Common.convertTimeStampToStringKey(Common.currentBooking.getTimestamp()))
+                    .document(Common.currentBooking.getSlot().toString());
+
+            // when we have document, delete it
+            barberBookingInfo.delete().addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // after delete on Barber done
+                    // delete from User
+
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "Current booking must not be null", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     // Firestore collection
     CollectionReference bannerRef, lookBookRef;
@@ -123,7 +169,7 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
                             if (!task.getResult().isEmpty()) {
                                 for (QueryDocumentSnapshot snapshot : task.getResult()) {
                                     BookingInformation bookingInformation = snapshot.toObject(BookingInformation.class);
-                                    iBookingInfoLoadListener.onBookingInfoLoadSuccess(bookingInformation);
+                                    iBookingInfoLoadListener.onBookingInfoLoadSuccess(bookingInformation, snapshot.getId());
                                     break; // exit loop as soon as
                                 }
                             } else {
@@ -245,11 +291,12 @@ public class HomeFragment extends Fragment implements IBannerLoadListener, ILook
     }
 
     @Override
-    public void onBookingInfoLoadSuccess(BookingInformation bookingInformation) {
-        cardViewBookingInfo.setVisibility(View.VISIBLE
+    public void onBookingInfoLoadSuccess(BookingInformation bookingInformation, String bookingId) {
 
+        Common.currentBooking = bookingInformation;
+        Common.currentBookingId = bookingId;
 
-        );
+        cardViewBookingInfo.setVisibility(View.VISIBLE);
         txtSalonAddress.setText(bookingInformation.getSalonAddress());
         txtSalonBarber.setText(bookingInformation.getBarberName());
         txtTime.setText(bookingInformation.getTime());
