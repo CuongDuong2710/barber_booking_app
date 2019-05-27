@@ -265,7 +265,6 @@ public class BookingStepFourFragment extends Fragment {
             Log.d("CuongDNQ", "event: " + event.toString());
 
             Uri uri_save = getActivity().getContentResolver().insert(getCalendarsUri(), event);
-            Log.d("CuongDNQ", "insert: " + getActivity().getContentResolver().insert(getCalendarsUri(), event));
 
             // save to cache
             Paper.init(getActivity());
@@ -281,13 +280,17 @@ public class BookingStepFourFragment extends Fragment {
     }
 
     private String getCalendar(Context context) {
+        Uri calendars;
+        calendars =
+                Uri.parse("content://com.android.calendar/calendars");
+
         // get default calendar ID of Calendar Gmail
         String gmailIdCalendar = "";
         String protection[] = {"_id", "calendar_displayName"};
 
         ContentResolver contentResolver = context.getContentResolver();
         // select all calendar
-        Cursor cursor = contentResolver.query(getCalendarsUri(), protection, null, null, null);
+        Cursor cursor = contentResolver.query(calendars, protection, null, null, null);
         if (cursor.moveToFirst()) {
             String calName;
             int nameCol = cursor.getColumnIndex(protection[1]);
@@ -302,7 +305,7 @@ public class BookingStepFourFragment extends Fragment {
             } while (cursor.moveToNext());
             cursor.close();
         }
-        return  gmailIdCalendar;
+        return gmailIdCalendar;
     }
 
     private Uri getCalendarsUri() {
